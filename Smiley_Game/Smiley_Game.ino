@@ -11,6 +11,7 @@ float tempo = 0; // tempo da ritornare alla fine
 int posizione = 0;
 int punteggio = 0; // punteggio fatto dal giocatore
 int controllo = 0;
+int timer = 3000;
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 byte Smile[8] = {B00000,B01010,B01010,B00000,B10001,B11011,B01110,B00000};
 byte Cuore[8] = {B00000,B01010,B11111,B11111,B11111,B01110,B00100,B00000};
@@ -50,9 +51,9 @@ void scrivi2 ( String n, String m) // metodo che scrive sul'lcd
       lcd.print(m);
 }
 void ritorno()//metodo finale che mi restituisce il tempo in cui ho giocato e il punteggio
-{
-  scrivi2("      GAME","      OVER");delay(2000);
-  scrivi2("SCORE "+ String(punteggio), " TIME "+String(tempo/1000));
+{ 
+  scrivi2("      GAME","      OVER");delay(3000);
+  scrivi2("SCORE "+ String(punteggio), " TIME "+String((millis()-tempo)/1000)+"sec");
   delay(4000);
   Reset_AVR(); 
 }
@@ -61,7 +62,6 @@ void scrivi ( String n, int v, int p,int b) // metodo che scrive sul'lcd
       lcd.begin(16, 2);
       lcd.print(n);
       mettivite(v);
-      lcd.setCursor(0, 1);
       if(b==0)
       {
         mettifaccine(p,0);
@@ -89,9 +89,9 @@ void mettifaccine(int p, int n)
         lcd.write(byte(n));
       }
 }
-void mettivite(int v)
+void mettivite(int vita)
 {
-   for(int i= 0;i<v;i++)
+   for(int i= 0;i<vita;i++)
       {
         lcd.write(byte(1));
       }
@@ -99,21 +99,20 @@ void mettivite(int v)
 
 void cattivo()
 { int o = (analogRead(A1) %3);
-  scrivi("SCORE:"+String(punteggio)+"   ",vite,o,0); 
-  int controllo = 0;
+  scrivi("SCORE:"+String(punteggio)+"    ",vite,o,1); 
   controlla(o);
   bravoocattivo(0);
 }
 void buono()
 { int o = (analogRead(A1) %3);
-  scrivi("SCORE:"+String(punteggio)+"   ",vite,o,1);
+  scrivi("SCORE:"+String(punteggio)+"    ",vite,o,0);
   controlla(o);
   bravoocattivo(1);
 }
 void controlla(int posto)
 {
   int secondi = millis();
-  while((millis() - secondi)<=4000 || (digitalRead (B1) == LOW) ||(digitalRead (B2) == LOW) || (digitalRead (B3) == LOW))
+  while((millis() - secondi)<=timer || (digitalRead (B1) == LOW) ||(digitalRead (B2) == LOW) || (digitalRead (B3) == LOW))
   {
     if(digitalRead (B1) == LOW)
     {
@@ -128,7 +127,12 @@ void controlla(int posto)
       posizione = 2;
     }
   }
-    if(posto == posizione)
+    uguale(posto);
+    contatimer();
+}
+void uguale(int pos)
+{
+    if(pos == posizione)
     {
       controllo = 1;
     }
@@ -136,6 +140,17 @@ void controlla(int posto)
     {
       controllo = 0;
     }
+}
+void contatimer()
+{
+  if(timer > 400)
+  {
+    timer = timer -100;
+  }
+  else
+  {
+    timer = 3000;
+  }
 }
 void bravoocattivo(int n)
 {
@@ -155,8 +170,8 @@ controllo = 0;posizione = 0;
 }
 void tolgo()
 {
-  vite = vite--;
-  if(punteggio >10)
+  vite = vite-1;
+  if(punteggio >0)
   {
     punteggio = punteggio-10;
   }
@@ -165,7 +180,7 @@ void aggiungo()
 {
   if(vite < 3)
   {
-    vite = vite++;
+    vite = vite+1;
   }
   punteggio = punteggio +10;
 }
@@ -174,7 +189,7 @@ void loop()
   digitalWrite(A0, HIGH);
   play();
   while(vite > 0)
-  {
+  { delay(1000);
     int r = (analogRead(A1) %2);
     if(r == 1)
     {
