@@ -13,9 +13,9 @@ int punteggio = 0; // punteggio fatto dal giocatore
 int controllo = 0;
 int timer = 4000;
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+byte Cattivo[8] = {B00000,B01010,B01010,B00000,B01110,B11011,B10001,B00000};
 byte Smile[8] = {B00000,B01010,B01010,B00000,B10001,B11011,B01110,B00000};
 byte Cuore[8] = {B00000,B01010,B11111,B11111,B11111,B01110,B00100,B00000};
-byte Cattivo[8] = {B00000,B01010,B01010,B00000,B01110,B11011,B10001,B00000};
 byte CuoreRotto[8] = { B00000,B01010,B10101, B10001,B10001,B01010,B00100,B00000 };
 void setup() {
 Serial.begin(9600);
@@ -26,10 +26,9 @@ randomSeed(millis());
   pinMode(A0, OUTPUT);
   lcd.clear();
   lcd.createChar(1, Smile);
-  lcd.createChar(0, Cuore);
   lcd.createChar(2, Cattivo);
-  lcd.createChar(3, CuoreRotto);
-  lcd.begin(16, 2);
+  lcd.createChar(7, Cuore);
+  lcd.createChar(8, CuoreRotto);
 }
 void play()//metodo iniziale che fa partire il gioco appena premo un bottone 
 { scrivi2("  SMILEY GAME    "," PREMI E GIOCA ");
@@ -55,7 +54,7 @@ void ritorno()//metodo finale che mi restituisce il tempo in cui ho giocato e il
 void scrivi ( String n, int v, int p,int b) // metodo che scrive sul'lcd
 {     lcd.begin(16, 2);
       lcd.print(n);
-      mettivite(v);
+      mettivite(v);lcd.setCursor(0,1);
       if(b==0)
       { mettifaccine(p,1);  }
       if(b==1)
@@ -64,22 +63,23 @@ void scrivi ( String n, int v, int p,int b) // metodo che scrive sul'lcd
 void mettifaccine(int p, int n)
 {     if(p==0)
       { lcd.setCursor(3,1);
-        lcd.write(byte(n));
+        lcd.write((uint8_t)n);
       }
       if(p==1)
       { lcd.setCursor(7,1);
-        lcd.write(byte(n)); 
+        lcd.write((uint8_t)n); 
       }
       if(p==2)
       { lcd.setCursor(11,1);
-        lcd.write(byte(n));
+        lcd.write((uint8_t)n);
       }
 }
 void mettivite(int vita)
-{     for(int i= 0;i<vita;i++)
-      { lcd.write(byte(0));}
+{     lcd.setCursor(12,0);
+      for(int i= 0;i<vita;i++)
+      { lcd.write((uint8_t)7);}
       for(int i= 0;i<(3-vita);i++)
-      { lcd.write(byte(3));}
+      { lcd.write((uint8_t)8);}
 }
 void cattivo()
 { int o = (analogRead(A1) %3);
