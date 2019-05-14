@@ -1,6 +1,7 @@
 #define B1 7
 #define B2 8
 #define B3 13
+#include <EEPROM.h>
 #include <LiquidCrystal.h>
 #include <avr/io.h>
 #include <avr/wdt.h>
@@ -12,6 +13,7 @@ int posizione = 3;//posizione che sceglie il giocatore
 int punteggio = 0; // punteggio fatto dal giocatore
 int controllo = 0;//mi controlla se ho abagliato o no
 int timer = 4000;// soglia di tempo che hai per premere 
+int record = 0;
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 byte Cattivo[8] = {B00000, B01010, B01010, B00000, B01110, B11011, B10001, B00000};
 byte Smile[8] = {B00000, B01010, B01010, B00000, B10001, B11011, B01110, B00000};
@@ -30,13 +32,16 @@ randomSeed(millis());
   lcd.createChar(7, Cuore);
   lcd.createChar(8, CuoreRotto);
 }
+void mettirecord()
+{ if(record < punteggio)
+  {scrivi2("NUOVO RECORD:",String(punteggio));delay(2000);  EEPROM.write(0, punteggio);}
+  else{ scrivi2("RECORD NON","BATTUTO:  "+String(record));delay(2000);}
+}
 void play()//metodo iniziale che fa partire il gioco appena premo un bottone 
-{ scrivi2("  SMILEY GAME    "," PREMI E GIOCA ");
+{ scrivi2("  SMILEY GAME    "," PREMI E GIOCA "); record = EEPROM.read(0); 
   while(vai == 0)
   { if(digitalRead (B1) == LOW || digitalRead (B2) == LOW || digitalRead (B3) == LOW)
-    {   vai = 1;
-       tempo = millis();
-    }
+    {   vai = 1;  tempo = millis(); scrivi2("RECORD DA","BATTERE: " + String(record)); delay(2000);}
   }
 }
 void scrivi2 ( String n, String m) // metodo che scrive sul'lcd solo due stringhe
@@ -46,10 +51,9 @@ void scrivi2 ( String n, String m) // metodo che scrive sul'lcd solo due stringh
       lcd.print(m);
 }
 void ritorno()//metodo finale che mi restituisce il tempo in cui ho giocato e il punteggio
-{ 
-  scrivi("SCORE:"+String(punteggio)+"   ",vite,7,7); delay(700);
+{ scrivi("SCORE:"+String(punteggio)+"   ",vite,7,7); delay(1000); mettirecord(); delay(1000);
   scrivi2("      GAME","      OVER");delay(3000);
-  scrivi2(" SCORE "+ String(punteggio), " TIME "+String((millis()-tempo)/1000)+"sec");
+  scrivi2("SCORE "+ String(punteggio), "TIME "+String((millis()-tempo)/1000)+"sec");
   delay(4000);
   Reset_AVR(); 
 }
@@ -98,14 +102,14 @@ void buono()// fa in modo che compare solo la faccina buona ed esegue il control
 void controlla(int posto, int b)// da il tempo che il giocatore ha a disposizione e legge cosa ha scelto
 { bool finito = false; float sec = millis();
   while(!finito)
-  {  if((millis() - sec) >= timer)
-    { posizione = 3; finito = true; contatimer(); }
+  { if((millis() - sec) >= timer)
+    { posizione = 3;  finito = true;   contatimer();   }
     if(digitalRead (B1) == LOW)
-    { posizione = 0; finito = true; contatimer(); }
+    { posizione = 0;  finito = true;   contatimer();   }
     if(digitalRead (B2) == LOW)
-    { posizione = 1; finito = true; contatimer(); }
+    { posizione = 1;  finito = true;   contatimer();   }
     if(digitalRead (B3) == LOW)
-    { posizione = 2; finito = true; contatimer(); }
+    { posizione = 2;  finito = true;   contatimer();   }
   }   
     scrivi2("SCORE:"+String(punteggio),"    "); delay(500);
     uguale(posto, b);
