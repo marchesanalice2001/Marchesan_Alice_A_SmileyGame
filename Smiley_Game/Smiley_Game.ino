@@ -34,8 +34,9 @@ randomSeed(millis());
 }
 void mettirecord()
 { if(record < punteggio)
-  {scrivi2("NUOVO RECORD:",String(punteggio));delay(2000);  EEPROM.write(0, punteggio);}
-  else{ scrivi2("RECORD NON","BATTUTO:  "+String(record));delay(2000);}
+  {scrivi2("NUOVO RECORD:",String(punteggio));delay(2000);      EEPROM.write(0, punteggio);}
+  else
+  { scrivi2("RECORD NON","BATTUTO:  "+String(record));      delay(2000);}
 }
 void play()//metodo iniziale che fa partire il gioco appena premo un bottone 
 { scrivi2("  SMILEY GAME    "," PREMI E GIOCA "); record = EEPROM.read(0); 
